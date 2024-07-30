@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique</title>
+    <link id="theme-style" rel="stylesheet" href="{{ url_for('static', filename='default.css') }}">
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('index') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('historique') }}">Historique</a></li>
+            <li><a href=#>Paramètres</a></li>
+            {% if 'username' in session %}
+            <li><a href="{{ url_for('logout') }}">Déconnexion</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Authentification</a></li>
+            {% endif %}
+        </ul>
+        <!-- Theme Switcher -->
+        <div class="theme-switcher">
+            <label for="theme-select">Theme</label>
+            <select id="theme-select">
+                <option value="{{ url_for('static', filename='default.css') }}">Default</option>
+                <option value="{{ url_for('static', filename='dark.css') }}">Dark</option>
+            </select>
+        </div>
+    </div>
+    <div class="content">
+        <h2>Historique des Statuts des Machines</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Equipement</th>
+                    <th>Adresse IP</th>
+                    <th>Statut</th>
+                    <th>Heure</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in historique_entries %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ entry.device }}</td>
+                    <td>{{ entry.host }}</td>
+                    <td>{{ entry.status }}</td>
+                    <td>{{ entry.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

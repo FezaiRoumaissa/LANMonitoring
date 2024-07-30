@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Template</title>
+    <link id="theme-style" rel="stylesheet" href="{{ url_for('static', filename='default.css') }}">
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('index') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('historique') }}">Historique</a></li>
+            <li><a href="#">Parametres</a></li>
+            {% if 'username' in session %}
+            <li><a href="{{ url_for('logout') }}">Déconnexion</a></li>
+            {% else %}
+            <li><a href="{{ url_for('login') }}">Authentification</a></li>
+            {% endif %}
+        </ul>
+        <!-- Theme Switcher -->
+        <div class="theme-switcher">
+            <label for="theme-select">Theme</label>
+            <select id="theme-select">
+                <option value="{{ url_for('static', filename='default.css') }}">Default</option>
+                <option value="{{ url_for('static', filename='dark.css') }}">Dark</option>
+            </select>
+        </div>
+    </div>
+    <div class="content">
+        <div class="stats-container">
+            <div class="stats-box red">
+                <h2>{{ total_offline }}</h2>
+                <p>Total hors ligne</p>
+            </div>
+            <div class="stats-box blue">
+                <h2>{{ total_unknown }}</h2>
+                <p>Total Inconnu</p>
+            </div>
+            <div class="stats-box orange">
+                <h2>{{ total_paused }}</h2>
+                <p>Total En pause</p>
+            </div>
+            <div class="stats-box green">
+                <h2>{{ total_devices }}</h2>
+                <p>Total Equipements</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h2> Equipements </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Equipement</th>
+                        <th>Adresse Ip</th>
+                        <th>Statut</th>
+                        <th>Duree</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ device.device }}</td>
+                        <td>{{ device.host }}</td>
+                        <td>{{ device.status }}</td>
+                        <td id="downtimesince-{{ loop.index }}" data-seconds="{{ device.downtimesince }}">
+                            {{ device.downtimesince | format_time }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.getElementById('theme-select').addEventListener('change', function() {
+            var theme = this.value;
+            document.getElementById('theme-style').setAttribute('href', theme);
+        });
+        // Fonction pour formater le temps écoulé en jours, heures, minutes et secondes
+    function formatTime(seconds) {
+      const days = Math.floor(seconds / 86400);
+      seconds %= 86400;
+      const hours = Math.floor(seconds / 3600);
+      seconds %= 3600;
+      const minutes = Math.floor(seconds / 60);
+      seconds = seconds % 60;
+      return `${days}j ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    // Fonction pour mettre à jour le temps écoulé toutes les secondes
+    function updateTime() {
+      const elements = document.querySelectorAll('[id^="downtimesince-"]');
+      elements.forEach(element => {
+        let seconds = parseInt(element.getAttribute('data-seconds'));
+        seconds += 1;
+        element.setAttribute('data-seconds', seconds);
+        element.textContent = formatTime(seconds);
+
+        const row = document.getElementById('row-' + element.id.split('-')[1]);
+        if (seconds > 86400) {
+          row.classList.remove('normal');
+          row.classList.add('warning');
+        } else {
+          row.classList.remove('warning');
+          row.classList.add('normal');
+        }
+      });
+    }
+    // Initialiser l'affichage du temps
+    document.querySelectorAll('[id^="downtimesince-"]').forEach(element => {
+            let seconds = parseInt(element.getAttribute('data-seconds'));
+            element.textContent = formatTime(seconds);
+        });
+
+        // Mettre à jour le temps toutes les secondes
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
